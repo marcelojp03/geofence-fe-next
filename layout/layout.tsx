@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEventListener, useMountEffect, useUnmountEffect } from 'primereact/hooks';
-import React, { useContext, useEffect, useRef } from 'react';
+import { useEventListener, useUnmountEffect } from 'primereact/hooks';
+import React, { Suspense, useContext, useEffect, useRef } from 'react';
 import { classNames } from 'primereact/utils';
 import AppFooter from './AppFooter';
 import AppSidebar from './AppSidebar';
@@ -13,6 +12,18 @@ import { LayoutContext } from './context/layoutcontext';
 import { PrimeReactContext } from 'primereact/api';
 import { ChildContainerProps, LayoutState, AppTopbarRef } from '@/types';
 import { usePathname, useSearchParams } from 'next/navigation';
+
+// Componente interno que usa useSearchParams
+const NavigationEvents = ({ onNavigate }: { onNavigate: () => void }) => {
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        onNavigate();
+    }, [pathname, searchParams, onNavigate]);
+
+    return null;
+};
 
 const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -35,12 +46,10 @@ const Layout = ({ children }: ChildContainerProps) => {
         }
     });
 
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    useEffect(() => {
+    const handleNavigate = React.useCallback(() => {
         hideMenu();
         hideProfileMenu();
-    }, [pathname, searchParams]);
+    }, []);
 
     const [bindProfileMenuOutsideClickListener, unbindProfileMenuOutsideClickListener] = useEventListener({
         type: 'click',
@@ -124,6 +133,9 @@ const Layout = ({ children }: ChildContainerProps) => {
 
     return (
         <React.Fragment>
+            <Suspense fallback={null}>
+                <NavigationEvents onNavigate={handleNavigate} />
+            </Suspense>
             <div className={containerClass}>
                 <AppTopbar ref={topbarRef} />
                 <div ref={sidebarRef} className="layout-sidebar">

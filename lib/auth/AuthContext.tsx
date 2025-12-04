@@ -64,8 +64,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authService.login(credentials);
       
-      // Store token and user in localStorage
-      localStorage.setItem("token", response.access_token);
+      // Store token and user in localStorage (API returns accessToken)
+      localStorage.setItem("token", response.accessToken);
       localStorage.setItem("user", JSON.stringify(response.user));
       
       setUser(response.user);

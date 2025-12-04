@@ -9,21 +9,24 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
-import * as parentsService from '../../../lib/api/parents';
-import { Parent, CreateParentRequest, UpdateParentRequest } from '../../../lib/types';
+import * as usersService from '../../../lib/api/users';
+import { User, CreateUserRequest, UpdateUserRequest } from '../../../lib/types';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 export default function ParentsPage() {
-    const [parents, setParents] = useState<Parent[]>([]);
+    const [parents, setParents] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [selectedParent, setSelectedParent] = useState<Parent | null>(null);
-    const [formData, setFormData] = useState<CreateParentRequest>({
-        name: '',
+    const [selectedParent, setSelectedParent] = useState<User | null>(null);
+    const { user } = useAuth();
+    const [formData, setFormData] = useState<CreateUserRequest>({
+        schoolId: user?.schoolId || 0,
         email: '',
-        phone: '',
-        address: '',
         password: '',
+        fullName: '',
+        phone: '',
+        role: 'PARENT',
     });
     const toast = useRef<Toast>(null);
 
@@ -34,8 +37,8 @@ export default function ParentsPage() {
     const loadParents = async () => {
         try {
             setLoading(true);
-            const response = await parentsService.getParents();
-            setParents(response.data);
+            const response = await usersService.getParents();
+            setParents(response);
         } catch (error: any) {
             toast.current?.show({
                 severity: 'error',
@@ -50,24 +53,26 @@ export default function ParentsPage() {
 
     const openNew = () => {
         setFormData({
-            name: '',
+            schoolId: user?.schoolId || 0,
             email: '',
-            phone: '',
-            address: '',
             password: '',
+            fullName: '',
+            phone: '',
+            role: 'PARENT',
         });
         setIsEditMode(false);
         setSelectedParent(null);
         setDialogVisible(true);
     };
 
-    const openEdit = (parent: Parent) => {
+    const openEdit = (parent: User) => {
         setFormData({
-            name: parent.name,
+            schoolId: parent.schoolId,
             email: parent.email,
-            phone: parent.phone,
-            address: parent.address || '',
-            password: '', // Don't show existing password
+            password: '',
+            fullName: parent.fullName,
+            phone: parent.phone || '',
+            role: 'PARENT',
         });
         setIsEditMode(true);
         setSelectedParent(parent);
@@ -82,13 +87,12 @@ export default function ParentsPage() {
         try {
             if (isEditMode && selectedParent) {
                 // Update existing parent
-                const updateData: UpdateParentRequest = {
-                    name: formData.name,
+                const updateData: UpdateUserRequest = {
+                    fullName: formData.fullName,
                     email: formData.email,
                     phone: formData.phone,
-                    address: formData.address,
                 };
-                await parentsService.updateParent(selectedParent.id, updateData);
+                await usersService.updateUser(selectedParent.id, updateData);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Success',
@@ -97,7 +101,7 @@ export default function ParentsPage() {
                 });
             } else {
                 // Create new parent
-                await parentsService.createParent(formData);
+                await usersService.createUser(formData);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Success',
@@ -117,18 +121,18 @@ export default function ParentsPage() {
         }
     };
 
-    const confirmDelete = (parent: Parent) => {
+    const confirmDelete = (parent: User) => {
         confirmDialog({
-            message: `Are you sure you want to delete ${parent.name}?`,
+            message: `Are you sure you want to delete ${parent.fullName}?`,
             header: 'Confirm Delete',
             icon: 'pi pi-exclamation-triangle',
             accept: () => deleteParent(parent.id),
         });
     };
 
-    const deleteParent = async (id: string) => {
+    const deleteParent = async (id: number) => {
         try {
-            await parentsService.deleteParent(id);
+            await usersService.deleteUser(id);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
@@ -172,7 +176,7 @@ export default function ParentsPage() {
         );
     };
 
-    const actionBodyTemplate = (rowData: Parent) => {
+    const actionBodyTemplate = (rowData: User) => {
         return (
             <React.Fragment>
                 <Button
@@ -192,8 +196,8 @@ export default function ParentsPage() {
         );
     };
 
-    const dateBodyTemplate = (rowData: Parent) => {
-        return new Date(rowData.createdAt).toLocaleDateString();
+    const dateBodyTemplate = (rowData: User) => {
+        return rowData.status;
     };
 
     const dialogFooter = (
@@ -241,13 +245,12 @@ export default function ParentsPage() {
                             header={header}
                             responsiveLayout="scroll"
                         >
-                            <Column field="name" header="Name" sortable style={{ minWidth: '12rem' }} />
+                            <Column field="fullName" header="Name" sortable style={{ minWidth: '12rem' }} />
                             <Column field="email" header="Email" sortable style={{ minWidth: '16rem' }} />
                             <Column field="phone" header="Phone" sortable style={{ minWidth: '10rem' }} />
-                            <Column field="address" header="Address" sortable style={{ minWidth: '12rem' }} />
                             <Column
-                                field="createdAt"
-                                header="Created"
+                                field="status"
+                                header="Status"
                                 sortable
                                 body={dateBodyTemplate}
                                 style={{ minWidth: '10rem' }}
@@ -269,11 +272,11 @@ export default function ParentsPage() {
                             onHide={hideDialog}
                         >
                             <div className="field">
-                                <label htmlFor="name">Name</label>
+                                <label htmlFor="fullName">Full Name</label>
                                 <InputText
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    id="fullName"
+                                    value={formData.fullName}
+                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                     required
                                     autoFocus
                                 />
@@ -292,17 +295,8 @@ export default function ParentsPage() {
                                 <label htmlFor="phone">Phone</label>
                                 <InputText
                                     id="phone"
-                                    value={formData.phone}
+                                    value={formData.phone || ''}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="field">
-                                <label htmlFor="address">Address</label>
-                                <InputText
-                                    id="address"
-                                    value={formData.address}
-                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
                             </div>
                             {!isEditMode && (

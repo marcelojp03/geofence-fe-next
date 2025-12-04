@@ -1,5 +1,5 @@
 import { http } from "./http";
-import { LoginRequest, LoginResponse, RegisterRequest, User } from "../types";
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, User } from "../types";
 
 /**
  * Authentication API Service
@@ -12,14 +12,14 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
 };
 
 // Register new user
-export const register = async (data: RegisterRequest): Promise<LoginResponse> => {
-  const response = await http.post<LoginResponse>("/auth/register", data);
+export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
+  const response = await http.post<RegisterResponse>("/auth/register", data);
   return response.data;
 };
 
 // Get current user profile
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await http.get<User>("/auth/profile");
+  const response = await http.get<User>("/auth/me");
   return response.data;
 };
 

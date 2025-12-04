@@ -175,6 +175,7 @@ const ListDemo = () => {
                         }}
                         sourceStyle={{ height: '200px' }}
                         targetStyle={{ height: '200px' }}
+                        dataKey="code"
                     ></PickList>
                 </div>
             </div>
@@ -182,7 +183,7 @@ const ListDemo = () => {
             <div className="col-12 xl:col-4">
                 <div className="card">
                     <h5>OrderList</h5>
-                    <OrderList value={orderlistValue} listStyle={{ height: '200px' }} className="p-orderlist-responsive" header="Cities" itemTemplate={(item) => <div>{item.name}</div>} onChange={(e) => setOrderlistValue(e.value)}></OrderList>
+                    <OrderList value={orderlistValue} listStyle={{ height: '200px' }} className="p-orderlist-responsive" header="Cities" itemTemplate={(item) => <div>{item.name}</div>} onChange={(e) => setOrderlistValue(e.value)} dataKey="code"></OrderList>
                 </div>
             </div>
         </div>

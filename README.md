@@ -1,10 +1,10 @@
 # Geofence Management System
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0-blue)](https://reactjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2-blue)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
-[![PrimeReact](https://img.shields.io/badge/PrimeReact-10.8-orange)](https://primereact.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
+[![PrimeReact](https://img.shields.io/badge/PrimeReact-10.9-orange)](https://primereact.org/)
+[![AWS Amplify](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)](https://aws.amazon.com/amplify/)
 
 Web application for real-time geofence monitoring and location tracking management.
 
@@ -30,12 +30,12 @@ npm install
 
 ### 3. Configure environment
 
-Create a `.env.local` file in the root directory:
+The project uses environment-specific files:
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
-NEXT_PUBLIC_GEOSERVER_URL=http://localhost:8080/geoserver
-```
+- **Development/Test:** `.env.local` (already configured for localhost:3000)
+- **Production:** `.env.production` (configured for AWS App Runner)
+
+To modify environment variables, edit the corresponding file.
 
 ### 4. Run development server
 
@@ -47,29 +47,31 @@ Application will be available at [http://localhost:3000](http://localhost:3000)
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm start` | Run production server |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
+| Command | Description | Environment |
+|---------|-------------|-------------|
+| `npm run dev` | Start development server | Uses `.env.local` |
+| `npm run build` | Build for production | Uses `.env.production` |
+| `npm start` | Run production server | Uses built production code |
+| `npm run lint` | Run ESLint | - |
+| `npm run format` | Format code with Prettier | - |
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_API_URL` | Backend API endpoint | Yes |
-| `NEXT_PUBLIC_GEOSERVER_URL` | GeoServer WMS endpoint | No |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API endpoint | Yes | Development: `http://localhost:3000`<br>Production: `https://i8s2qej2p3.us-east-1.awsapprunner.com` |
+| `NEXT_PUBLIC_GEOSERVER_URL` | GeoServer WMS endpoint | No | `http://localhost:8080/geoserver` |
+| `NODE_ENV` | Environment mode | Auto | `development` or `production` |
 
 ## Technology Stack
 
-- **Framework:** Next.js 15.5 (App Router)
-- **UI Library:** PrimeReact 10.8
+- **Framework:** Next.js 16 (App Router + Turbopack)
+- **UI Library:** PrimeReact 10.9
 - **Styling:** PrimeFlex, SCSS
 - **Maps:** Leaflet 1.9, React-Leaflet 5.0
-- **HTTP Client:** Axios 1.7
+- **HTTP Client:** Axios 1.13.2
 - **Language:** TypeScript 5.7
+- **Deployment:** AWS Amplify (SSR)
 
 ## Project Structure
 
@@ -87,16 +89,20 @@ Application will be available at [http://localhost:3000](http://localhost:3000)
 └── public/               # Static assets
 ```
 
+## Deployment
+
+This project is configured for **AWS Amplify** with SSR support.
+
+### Deploy to AWS Amplify
+
+1. Connect your GitHub repository to AWS Amplify
+2. Select the `main` branch
+3. Amplify will auto-detect Next.js and use `amplify.yml`
+4. Add environment variable: `NEXT_PUBLIC_API_URL`
+
 ## Documentation
 
-For detailed information about features, architecture, and API integration, see [DOCUMENTATION.md](DOCUMENTATION.md)
+For detailed information about features, architecture, and API integration, see:
+- [DOCUMENTATION.md](DOCUMENTATION.md) - Project documentation
+- [API_REFERENCE.md](API_REFERENCE.md) - Backend API reference
 
-## License
-
-This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
-
-## Academic Context
-
-**Institution:** Universidad Autónoma Gabriel René Moreno (UAGRM)  
-**Course:** Sistemas de Información Geográfica  
-**Semester:** 2-2025

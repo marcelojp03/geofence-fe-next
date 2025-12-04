@@ -3,26 +3,27 @@ import {
   Child,
   CreateChildRequest,
   UpdateChildRequest,
-  PaginatedResponse,
-  PaginationParams,
 } from "../types";
 
 /**
  * Children API Service
  */
 
-// Get all children with pagination
-export const getChildren = async (
-  params?: PaginationParams
-): Promise<PaginatedResponse<Child>> => {
-  const response = await http.get<PaginatedResponse<Child>>("/children", {
-    params,
-  });
+// Get all children (schoolId is extracted from JWT token in backend)
+export const getChildren = async (parentId?: number): Promise<Child[]> => {
+  const params = parentId ? { parentId } : {};
+  const response = await http.get<Child[]>("/children", { params });
+  return response.data;
+};
+
+// Get my children (for parent users - mobile app)
+export const getMyChildren = async (): Promise<Child[]> => {
+  const response = await http.get<Child[]>("/children/my-children");
   return response.data;
 };
 
 // Get single child by ID
-export const getChild = async (id: string): Promise<Child> => {
+export const getChild = async (id: number): Promise<Child> => {
   const response = await http.get<Child>(`/children/${id}`);
   return response.data;
 };
@@ -35,7 +36,7 @@ export const createChild = async (data: CreateChildRequest): Promise<Child> => {
 
 // Update child
 export const updateChild = async (
-  id: string,
+  id: number,
   data: UpdateChildRequest
 ): Promise<Child> => {
   const response = await http.patch<Child>(`/children/${id}`, data);
@@ -43,27 +44,6 @@ export const updateChild = async (
 };
 
 // Delete child
-export const deleteChild = async (id: string): Promise<void> => {
+export const deleteChild = async (id: number): Promise<void> => {
   await http.delete(`/children/${id}`);
-};
-
-// Toggle child active status
-export const toggleChildStatus = async (id: string): Promise<Child> => {
-  const response = await http.patch<Child>(`/children/${id}/toggle-status`);
-  return response.data;
-};
-
-// Get child's geofences
-export const getChildGeofences = async (childId: string): Promise<any[]> => {
-  const response = await http.get(`/children/${childId}/geofences`);
-  return response.data;
-};
-
-// Get child's positions history
-export const getChildPositions = async (
-  childId: string,
-  params?: { startDate?: string; endDate?: string }
-): Promise<any[]> => {
-  const response = await http.get(`/children/${childId}/positions`, { params });
-  return response.data;
 };

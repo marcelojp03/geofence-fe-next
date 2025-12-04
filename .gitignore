@@ -30,6 +30,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# amplify
+.amplify
+amplify-builds/
+
+# IDE
+.idea/
+.vscode/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

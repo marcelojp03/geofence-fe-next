@@ -13,22 +13,24 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import * as childrenService from '../../../lib/api/children';
-import * as parentsService from '../../../lib/api/parents';
-import { Child, Parent, CreateChildRequest, UpdateChildRequest } from '../../../lib/types';
+import * as usersService from '../../../lib/api/users';
+import { Child, User, CreateChildRequest, UpdateChildRequest } from '../../../lib/types';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 export default function ChildrenPage() {
     const [children, setChildren] = useState<Child[]>([]);
-    const [parents, setParents] = useState<Parent[]>([]);
+    const [parents, setParents] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [dialogVisible, setDialogVisible] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+    const { user } = useAuth();
     const [formData, setFormData] = useState<CreateChildRequest>({
-        name: '',
+        schoolId: user?.schoolId || 0,
+        parentId: 0,
+        fullName: '',
         age: 5,
-        school: '',
-        parentId: '',
-        deviceId: '',
+        grade: '',
     });
     const toast = useRef<Toast>(null);
 
@@ -41,12 +43,12 @@ export default function ChildrenPage() {
         try {
             setLoading(true);
             const response = await childrenService.getChildren();
-            setChildren(response.data);
+            setChildren(response);
         } catch (error: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response?.data?.message || 'Error loading children',
+                detail: error.message || 'Error loading children',
                 life: 3000,
             });
         } finally {
@@ -56,8 +58,8 @@ export default function ChildrenPage() {
 
     const loadParents = async () => {
         try {
-            const response = await parentsService.getParents();
-            setParents(response.data);
+            const response = await usersService.getParents();
+            setParents(response);
         } catch (error: any) {
             console.error('Error loading parents:', error);
         }
@@ -65,11 +67,11 @@ export default function ChildrenPage() {
 
     const openNew = () => {
         setFormData({
-            name: '',
+            schoolId: user?.schoolId || 0,
+            parentId: 0,
+            fullName: '',
             age: 5,
-            school: '',
-            parentId: '',
-            deviceId: '',
+            grade: '',
         });
         setIsEditMode(false);
         setSelectedChild(null);
@@ -78,11 +80,11 @@ export default function ChildrenPage() {
 
     const openEdit = (child: Child) => {
         setFormData({
-            name: child.name,
-            age: child.age,
-            school: child.school || '',
+            schoolId: child.schoolId,
             parentId: child.parentId,
-            deviceId: child.deviceId || '',
+            fullName: child.fullName,
+            age: child.age,
+            grade: child.grade || '',
         });
         setIsEditMode(true);
         setSelectedChild(child);
@@ -97,11 +99,10 @@ export default function ChildrenPage() {
         try {
             if (isEditMode && selectedChild) {
                 const updateData: UpdateChildRequest = {
-                    name: formData.name,
+                    fullName: formData.fullName,
                     age: formData.age,
-                    school: formData.school,
+                    grade: formData.grade,
                     parentId: formData.parentId,
-                    deviceId: formData.deviceId,
                 };
                 await childrenService.updateChild(selectedChild.id, updateData);
                 toast.current?.show({
@@ -133,14 +134,14 @@ export default function ChildrenPage() {
 
     const confirmDelete = (child: Child) => {
         confirmDialog({
-            message: `Are you sure you want to delete ${child.name}?`,
+            message: `Are you sure you want to delete ${child.fullName}?`,
             header: 'Confirm Delete',
             icon: 'pi pi-exclamation-triangle',
             accept: () => deleteChild(child.id),
         });
     };
 
-    const deleteChild = async (id: string) => {
+    const deleteChild = async (id: number) => {
         try {
             await childrenService.deleteChild(id);
             toast.current?.show({
@@ -155,26 +156,6 @@ export default function ChildrenPage() {
                 severity: 'error',
                 summary: 'Error',
                 detail: error.response?.data?.message || 'Error deleting child',
-                life: 3000,
-            });
-        }
-    };
-
-    const toggleStatus = async (child: Child) => {
-        try {
-            await childrenService.toggleChildStatus(child.id);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Status updated successfully',
-                life: 3000,
-            });
-            loadChildren();
-        } catch (error: any) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: error.response?.data?.message || 'Error updating status',
                 life: 3000,
             });
         }
@@ -219,16 +200,14 @@ export default function ChildrenPage() {
     const statusBodyTemplate = (rowData: Child) => {
         return (
             <Tag
-                value={rowData.isActive ? 'Active' : 'Inactive'}
-                severity={rowData.isActive ? 'success' : 'danger'}
-                onClick={() => toggleStatus(rowData)}
-                style={{ cursor: 'pointer' }}
+                value={rowData.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                severity={rowData.status === 'ACTIVE' ? 'success' : 'danger'}
             />
         );
     };
 
     const parentBodyTemplate = (rowData: Child) => {
-        return rowData.parent?.name || 'N/A';
+        return rowData.parent?.fullName || 'N/A';
     };
 
     const dateBodyTemplate = (rowData: Child) => {
@@ -280,9 +259,9 @@ export default function ChildrenPage() {
                             header={header}
                             responsiveLayout="scroll"
                         >
-                            <Column field="name" header="Name" sortable style={{ minWidth: '12rem' }} />
+                            <Column field="fullName" header="Name" sortable style={{ minWidth: '12rem' }} />
                             <Column field="age" header="Age" sortable style={{ minWidth: '8rem' }} />
-                            <Column field="school" header="School" sortable style={{ minWidth: '12rem' }} />
+                            <Column field="grade" header="Grade" sortable style={{ minWidth: '12rem' }} />
                             <Column
                                 field="parent"
                                 header="Parent"
@@ -291,13 +270,7 @@ export default function ChildrenPage() {
                                 style={{ minWidth: '12rem' }}
                             />
                             <Column
-                                field="deviceId"
-                                header="Device ID"
-                                sortable
-                                style={{ minWidth: '10rem' }}
-                            />
-                            <Column
-                                field="isActive"
+                                field="status"
                                 header="Status"
                                 body={statusBodyTemplate}
                                 sortable
@@ -327,11 +300,11 @@ export default function ChildrenPage() {
                             onHide={hideDialog}
                         >
                             <div className="field">
-                                <label htmlFor="name">Name</label>
+                                <label htmlFor="fullName">Full Name</label>
                                 <InputText
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    id="fullName"
+                                    value={formData.fullName}
+                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                     required
                                     autoFocus
                                 />
@@ -350,11 +323,11 @@ export default function ChildrenPage() {
                                 />
                             </div>
                             <div className="field">
-                                <label htmlFor="school">School</label>
+                                <label htmlFor="grade">Grade</label>
                                 <InputText
-                                    id="school"
-                                    value={formData.school}
-                                    onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                                    id="grade"
+                                    value={formData.grade || ''}
+                                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                                 />
                             </div>
                             <div className="field">
@@ -364,20 +337,10 @@ export default function ChildrenPage() {
                                     value={formData.parentId}
                                     options={parents}
                                     onChange={(e) => setFormData({ ...formData, parentId: e.value })}
-                                    optionLabel="name"
+                                    optionLabel="fullName"
                                     optionValue="id"
                                     placeholder="Select a Parent"
                                     required
-                                />
-                            </div>
-                            <div className="field">
-                                <label htmlFor="deviceId">Device ID</label>
-                                <InputText
-                                    id="deviceId"
-                                    value={formData.deviceId}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, deviceId: e.target.value })
-                                    }
                                 />
                             </div>
                         </Dialog>

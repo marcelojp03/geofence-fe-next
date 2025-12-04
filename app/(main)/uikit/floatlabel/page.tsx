@@ -21,7 +21,7 @@ const FloatLabelDemo = () => {
         []
     );
     const [value1, setValue1] = useState("");
-    const [value2, setValue2] = useState(null);
+    const [value2, setValue2] = useState<Demo.Country | undefined>(undefined);
     const [value3, setValue3] = useState("");
     const [value4, setValue4] = useState("");
     const [value5, setValue5] = useState<any>(null);
@@ -80,7 +80,7 @@ const FloatLabelDemo = () => {
                 </div>
                 <div className="field col-12 md:col-4">
                     <span className="p-float-label">
-                        <AutoComplete
+                        <AutoComplete<Demo.Country>
                             id="autocomplete"
                             value={value2}
                             onChange={(e) => setValue2(e.value)}

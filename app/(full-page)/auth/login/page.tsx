@@ -43,14 +43,23 @@ const LoginPage = () => {
 
         try {
             await login({ email, password });
-            router.push('/monitoring');
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Login successful! Redirecting...',
+                life: 2000
+            });
+            setTimeout(() => {
+                router.push('/monitoring');
+            }, 1000);
         } catch (err: any) {
             console.error('Login error:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password';
             toast.current?.show({
                 severity: 'error',
-                summary: 'Error',
-                detail: err.response?.data?.message || 'Invalid email or password',
-                life: 3000
+                summary: 'Login Failed',
+                detail: errorMessage,
+                life: 5000
             });
         } finally {
             setLoading(false);
@@ -61,7 +70,7 @@ const LoginPage = () => {
 
     return (
         <div className={containerClassName}>
-            <Toast ref={toast} />
+            <Toast ref={toast} position="top-right" style={{ zIndex: 9999 }} />
             <div className="flex flex-column align-items-center justify-content-center">
                 <img src={`/layout/images/logo-${layoutConfig.colorScheme === 'light' ? 'dark' : 'white'}.svg`} alt="Sakai logo" className="mb-5 w-6rem flex-shrink-0" />
                 <div

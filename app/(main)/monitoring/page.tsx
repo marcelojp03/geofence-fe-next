@@ -6,9 +6,10 @@ import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
-import * as positionsService from '../../../lib/api/positions';
-import * as childrenService from '../../../lib/api/children';
-import { PositionWithChild, Child } from '../../../lib/types';
+import * as positionsService from '@/lib/api/positions';
+import * as childrenService from '@/lib/api/children';
+import { PositionWithChild, Child } from '@/lib/types';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 // Dynamic import to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import('../../../components/MapComponent'), {
@@ -30,23 +31,16 @@ export default function MonitoringPage() {
     const [loading, setLoading] = useState(false);
     const [autoRefresh, setAutoRefresh] = useState(false);
     const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
-    const [selectedChild, setSelectedChild] = useState<string | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+    const [selectedChild, setSelectedChild] = useState<number | null>(null);
     const toast = useRef<Toast>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const { user } = useAuth();
 
     const refreshIntervalOptions = [
         { label: '10 seconds', value: 10000 },
         { label: '30 seconds', value: 30000 },
         { label: '1 minute', value: 60000 },
         { label: '5 minutes', value: 300000 },
-    ];
-
-    const statusOptions = [
-        { label: 'All', value: null },
-        { label: 'Inside', value: 'INSIDE' },
-        { label: 'Outside', value: 'OUTSIDE' },
-        { label: 'Unknown', value: 'UNKNOWN' },
     ];
 
     useEffect(() => {
@@ -78,7 +72,7 @@ export default function MonitoringPage() {
 
     useEffect(() => {
         applyFilters();
-    }, [positions, selectedChild, selectedStatus]);
+    }, [positions, selectedChild]);
 
     const loadData = async () => {
         await Promise.all([loadPositions(), loadChildren()]);
@@ -87,14 +81,14 @@ export default function MonitoringPage() {
     const loadPositions = async () => {
         try {
             setLoading(true);
-            const data = await positionsService.getCurrentPositions();
+            const data = await positionsService.getAllCurrentPositions();
             setPositions(data);
         } catch (error: any) {
             console.error('Error loading positions:', error);
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response?.data?.message || 'Error loading positions',
+                detail: error.message || 'Error loading positions',
                 life: 3000,
             });
         } finally {
@@ -105,7 +99,7 @@ export default function MonitoringPage() {
     const loadChildren = async () => {
         try {
             const response = await childrenService.getChildren();
-            setChildren(response.data);
+            setChildren(response);
         } catch (error: any) {
             console.error('Error loading children:', error);
         }
@@ -116,10 +110,6 @@ export default function MonitoringPage() {
 
         if (selectedChild) {
             filtered = filtered.filter((p) => p.childId === selectedChild);
-        }
-
-        if (selectedStatus) {
-            filtered = filtered.filter((p) => p.status === selectedStatus);
         }
 
         setFilteredPositions(filtered);
@@ -135,14 +125,10 @@ export default function MonitoringPage() {
         });
     };
 
-    const getStatusCount = (status: string) => {
-        return positions.filter((p) => p.status === status).length;
-    };
-
     const childOptions = [
         { label: 'All Children', value: null },
         ...children.map((child) => ({
-            label: child.name,
+            label: child.fullName,
             value: child.id,
         })),
     ];
@@ -156,12 +142,12 @@ export default function MonitoringPage() {
                 <div className="col-12">
                     <div className="card">
                         <h5>Real-time Monitoring</h5>
-                        <p className="text-600">Track children's locations in real-time with automatic updates</p>
+                        <p className="text-600">Track children&apos;s locations in real-time with automatic updates</p>
                     </div>
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="col-12 lg:col-3">
+                <div className="col-12 lg:col-6">
                     <div className="card mb-0">
                         <div className="flex justify-content-between mb-3">
                             <div>
@@ -179,14 +165,12 @@ export default function MonitoringPage() {
                     </div>
                 </div>
 
-                <div className="col-12 lg:col-3">
+                <div className="col-12 lg:col-6">
                     <div className="card mb-0">
                         <div className="flex justify-content-between mb-3">
                             <div>
-                                <span className="block text-500 font-medium mb-3">Inside Geofence</span>
-                                <div className="text-900 font-medium text-xl">
-                                    {getStatusCount('INSIDE')}
-                                </div>
+                                <span className="block text-500 font-medium mb-3">Registered Children</span>
+                                <div className="text-900 font-medium text-xl">{children.length}</div>
                             </div>
                             <div
                                 className="flex align-items-center justify-content-center bg-green-100 border-round"
@@ -195,47 +179,7 @@ export default function MonitoringPage() {
                                 <i className="pi pi-check-circle text-green-500 text-xl"></i>
                             </div>
                         </div>
-                        <span className="text-green-500 font-medium">Safe zone</span>
-                    </div>
-                </div>
-
-                <div className="col-12 lg:col-3">
-                    <div className="card mb-0">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3">Outside Geofence</span>
-                                <div className="text-900 font-medium text-xl">
-                                    {getStatusCount('OUTSIDE')}
-                                </div>
-                            </div>
-                            <div
-                                className="flex align-items-center justify-content-center bg-red-100 border-round"
-                                style={{ width: '2.5rem', height: '2.5rem' }}
-                            >
-                                <i className="pi pi-exclamation-triangle text-red-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <span className="text-red-500 font-medium">Alert required</span>
-                    </div>
-                </div>
-
-                <div className="col-12 lg:col-3">
-                    <div className="card mb-0">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3">Unknown Status</span>
-                                <div className="text-900 font-medium text-xl">
-                                    {getStatusCount('UNKNOWN')}
-                                </div>
-                            </div>
-                            <div
-                                className="flex align-items-center justify-content-center bg-purple-100 border-round"
-                                style={{ width: '2.5rem', height: '2.5rem' }}
-                            >
-                                <i className="pi pi-question-circle text-purple-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <span className="text-500">Pending update</span>
+                        <span className="text-green-500 font-medium">In system</span>
                     </div>
                 </div>
 
@@ -244,7 +188,7 @@ export default function MonitoringPage() {
                     <div className="card">
                         <h5>Filters & Controls</h5>
                         <div className="grid">
-                            <div className="col-12 md:col-3">
+                            <div className="col-12 md:col-4">
                                 <label htmlFor="childFilter" className="block text-900 font-medium mb-2">
                                     Filter by Child
                                 </label>
@@ -258,21 +202,7 @@ export default function MonitoringPage() {
                                 />
                             </div>
 
-                            <div className="col-12 md:col-3">
-                                <label htmlFor="statusFilter" className="block text-900 font-medium mb-2">
-                                    Filter by Status
-                                </label>
-                                <Dropdown
-                                    id="statusFilter"
-                                    value={selectedStatus}
-                                    options={statusOptions}
-                                    onChange={(e) => setSelectedStatus(e.value)}
-                                    placeholder="Select status"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div className="col-12 md:col-3">
+                            <div className="col-12 md:col-4">
                                 <label htmlFor="refreshInterval" className="block text-900 font-medium mb-2">
                                     Refresh Interval
                                 </label>
@@ -285,7 +215,7 @@ export default function MonitoringPage() {
                                 />
                             </div>
 
-                            <div className="col-12 md:col-3">
+                            <div className="col-12 md:col-4">
                                 <label className="block text-900 font-medium mb-2">Controls</label>
                                 <div className="flex flex-column gap-2">
                                     <Button

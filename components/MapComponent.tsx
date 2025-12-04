@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, WMSTileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { PositionWithChild } from '../lib/types';
+import { PositionWithChild } from '@/lib/types';
+import Link from 'next/link';
 
 // Fix Leaflet default marker icons in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -65,15 +66,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
         );
     }
 
-    const getMarkerIcon = (status?: 'INSIDE' | 'OUTSIDE' | 'UNKNOWN') => {
-        switch (status) {
-            case 'INSIDE':
-                return greenIcon;
-            case 'OUTSIDE':
-                return redIcon;
-            default:
-                return greyIcon;
-        }
+    const getMarkerIcon = () => {
+        return greenIcon; // Default to green for now
     };
 
     const formatTimestamp = (timestamp: string) => {
@@ -107,49 +101,71 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
             )}
 
-            {/* Position markers */}
-            {positions.map((position) => (
+            {/* Position markers - filter out invalid positions */}
+            {positions
+                .filter((position) => position.lat != null && position.lng != null)
+                .map((position) => (
                 <Marker
                     key={position.id}
-                    position={[position.latitude, position.longitude]}
-                    icon={getMarkerIcon(position.status)}
+                    position={[position.lat, position.lng]}
+                    icon={getMarkerIcon()}
                 >
                     <Popup>
                         <div style={{ minWidth: '200px' }}>
-                            <h4 style={{ margin: '0 0 10px 0' }}>{position.child.name}</h4>
+                            <h4 style={{ margin: '0 0 10px 0' }}>{position.child?.fullName || 'Unknown'}</h4>
                             <p style={{ margin: '5px 0' }}>
-                                <strong>Parent:</strong> {position.child.parent?.name || 'N/A'}
+                                <strong>Parent:</strong> {position.child?.parent?.fullName || 'N/A'}
                             </p>
                             <p style={{ margin: '5px 0' }}>
-                                <strong>School:</strong> {position.child.school || 'N/A'}
+                                <strong>Grade:</strong> {position.child?.grade || 'N/A'}
                             </p>
+                            {position.batteryLevel !== undefined && (
+                                <p style={{ margin: '5px 0' }}>
+                                    <strong>Battery:</strong>{' '}
+                                    <span style={{ 
+                                        color: position.batteryLevel < 20 ? 'red' : position.batteryLevel < 50 ? 'orange' : 'green' 
+                                    }}>
+                                        {position.batteryLevel}%
+                                    </span>
+                                </p>
+                            )}
                             <p style={{ margin: '5px 0' }}>
-                                <strong>Status:</strong>{' '}
-                                <span
-                                    style={{
-                                        color:
-                                            position.status === 'INSIDE'
-                                                ? 'green'
-                                                : position.status === 'OUTSIDE'
-                                                ? 'red'
-                                                : 'gray',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {position.status || 'UNKNOWN'}
-                                </span>
-                            </p>
-                            <p style={{ margin: '5px 0' }}>
-                                <strong>Last Update:</strong> {formatTimestamp(position.timestamp)}
+                                <strong>Last Update:</strong> {formatTimestamp(position.createdAt)}
                             </p>
                             <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
-                                Lat: {position.latitude.toFixed(6)}, Lng:{' '}
-                                {position.longitude.toFixed(6)}
+                                Lat: {position.lat?.toFixed(6) ?? 'N/A'}, Lng: {position.lng?.toFixed(6) ?? 'N/A'}
                             </p>
                             {position.accuracy && (
                                 <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
                                     Accuracy: ±{position.accuracy}m
                                 </p>
+                            )}
+                            {position.speed !== undefined && position.speed > 0 && (
+                                <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
+                                    Speed: {(position.speed * 3.6).toFixed(1)} km/h
+                                </p>
+                            )}
+                            {position.childId && (
+                                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #eee' }}>
+                                    <Link
+                                        href={`/children/${position.childId}/history`}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            padding: '6px 12px',
+                                            backgroundColor: '#3b82f6',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            textDecoration: 'none',
+                                            fontSize: '0.85em',
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        <i className="pi pi-history" style={{ fontSize: '0.9em' }}></i>
+                                        View History
+                                    </Link>
+                                </div>
                             )}
                         </div>
                     </Popup>

@@ -1,9 +1,16 @@
-// User and Authentication Types
+// ==========================================
+// AUTH TYPES
+// ==========================================
+
 export interface User {
-  id: string;
+  id: number;
   email: string;
-  name: string;
-  role: 'ADMIN' | 'PARENT';
+  fullName: string;
+  phone?: string;
+  role: 'SCHOOL_ADMIN' | 'PARENT';
+  schoolId: number;
+  school?: School;
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface LoginRequest {
@@ -12,139 +19,213 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  access_token: string;
+  accessToken: string;
   user: User;
 }
 
 export interface RegisterRequest {
+  schoolId: number;
   email: string;
   password: string;
-  name: string;
-}
-
-// Parent Types
-export interface Parent {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateParentRequest {
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  password: string;
-}
-
-export interface UpdateParentRequest {
-  name?: string;
-  email?: string;
+  fullName: string;
   phone?: string;
-  address?: string;
+  role?: 'SCHOOL_ADMIN' | 'PARENT';
 }
 
-// Child Types
-export interface Child {
-  id: string;
+export interface RegisterResponse {
+  message: string;
+  user: Pick<User, 'id' | 'email' | 'fullName' | 'role'>;
+}
+
+// ==========================================
+// SCHOOL TYPES
+// ==========================================
+
+export interface School {
+  id: number;
   name: string;
+  address?: string;
+  phone?: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+}
+
+export interface CreateSchoolRequest {
+  name: string;
+  address?: string;
+  phone?: string;
+}
+
+export interface UpdateSchoolRequest {
+  name?: string;
+  address?: string;
+  phone?: string;
+}
+
+// ==========================================
+// USER TYPES (Parents/Admins)
+// ==========================================
+
+export interface CreateUserRequest {
+  schoolId: number;
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  role: 'SCHOOL_ADMIN' | 'PARENT';
+}
+
+export interface UpdateUserRequest {
+  email?: string;
+  fullName?: string;
+  phone?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
+}
+
+// ==========================================
+// CHILDREN TYPES
+// ==========================================
+
+export interface Child {
+  id: number;
+  schoolId: number;
+  parentId: number;
+  fullName: string;
   age: number;
-  school?: string;
-  parentId: string;
-  parent?: Parent;
-  deviceId?: string;
-  isActive: boolean;
+  grade?: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  parent?: User;
+  devices?: Device[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateChildRequest {
-  name: string;
+  schoolId: number;
+  parentId: number;
+  fullName: string;
   age: number;
-  school?: string;
-  parentId: string;
-  deviceId?: string;
+  grade?: string;
 }
 
 export interface UpdateChildRequest {
-  name?: string;
+  fullName?: string;
   age?: number;
-  school?: string;
-  parentId?: string;
-  deviceId?: string;
-  isActive?: boolean;
+  grade?: string;
+  parentId?: number;
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
-// Geofence Types
-export interface Geofence {
-  id: string;
+// ==========================================
+// DEVICE TYPES
+// ==========================================
+
+export interface Device {
+  id: number;
+  schoolId: number;
+  childId?: number;
+  deviceUid: string;
   name: string;
-  type: 'CIRCLE' | 'POLYGON';
-  center?: { lat: number; lng: number };
-  radius?: number;
-  polygon?: Array<{ lat: number; lng: number }>;
-  childId: string;
-  child?: Child;
-  isActive: boolean;
+  model?: string;
+  manufacturer?: string;
+  osVersion?: string;
+  platform: 'android' | 'ios';
+  fcmToken?: string;
+  lastBatteryLevel?: number;
+  status: 'ACTIVE' | 'INACTIVE';
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateGeofenceRequest {
+export interface CreateDeviceRequest {
+  schoolId: number;
+  deviceUid: string;
   name: string;
-  type: 'CIRCLE' | 'POLYGON';
-  center?: { lat: number; lng: number };
-  radius?: number;
-  polygon?: Array<{ lat: number; lng: number }>;
-  childId: string;
+  model?: string;
+  manufacturer?: string;
+  osVersion?: string;
+  platform: 'android' | 'ios';
+  fcmToken?: string;
 }
 
-export interface UpdateGeofenceRequest {
+export interface LinkDeviceRequest {
+  deviceUid: string;
+  childId: number;
+}
+
+export interface UpdateDeviceRequest {
   name?: string;
-  type?: 'CIRCLE' | 'POLYGON';
-  center?: { lat: number; lng: number };
-  radius?: number;
-  polygon?: Array<{ lat: number; lng: number }>;
-  isActive?: boolean;
+  fcmToken?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
-// Position Types
+// ==========================================
+// TRACKING/POSITION TYPES
+// ==========================================
+
 export interface Position {
-  id: string;
-  latitude: number;
-  longitude: number;
+  id: number;
+  childId: number;
+  deviceId: number;
+  lat: number;
+  lng: number;
   accuracy?: number;
-  timestamp: string;
-  childId: string;
-  child?: Child;
-  status?: 'INSIDE' | 'OUTSIDE' | 'UNKNOWN';
+  speed?: number;
+  heading?: number;
+  altitude?: number;
+  batteryLevel?: number;
   createdAt: string;
+  child?: Child;
+}
+
+export interface CreatePositionRequest {
+  deviceUid: string;
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  speed?: number;
+  heading?: number;
+  altitude?: number;
+  batteryLevel?: number;
+}
+
+export interface CreatePositionResponse {
+  position: Position;
+  isWithinArea: boolean;
+  alertCreated: boolean;
 }
 
 export interface PositionWithChild extends Position {
-  child: Child & { parent: Parent };
+  child: Child & { 
+    parent?: User;
+    devices?: Device[];
+  };
 }
 
-// Alert Types
+// ==========================================
+// ALERT TYPES
+// ==========================================
+
 export interface Alert {
-  id: string;
-  type: 'GEOFENCE_EXIT' | 'GEOFENCE_ENTER' | 'LOW_BATTERY' | 'DEVICE_OFFLINE';
+  id: number;
+  type: 'ENTER_AREA' | 'EXIT_AREA';
   message: string;
-  childId: string;
-  child?: Child;
-  geofenceId?: string;
-  geofence?: Geofence;
-  positionId?: string;
-  position?: Position;
   isRead: boolean;
+  childId: number;
+  child?: Child;
+  positionId?: number;
+  position?: Position;
   createdAt: string;
 }
 
-// Filter and Pagination Types
+export interface UpdateAlertRequest {
+  isRead?: boolean;
+}
+
+// ==========================================
+// COMMON TYPES
+// ==========================================
+
 export interface PaginationParams {
   page?: number;
   limit?: number;
@@ -160,6 +241,13 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Query params for tracking history
+export interface TrackingHistoryParams {
+  limit?: number;
+  from?: string;
+  to?: string;
+}
+
 // Map Types
 export interface MapBounds {
   north: number;
@@ -169,9 +257,41 @@ export interface MapBounds {
 }
 
 export interface MarkerData {
-  id: string;
-  position: [number, number];
+  id: number;
+  position: [number, number]; // [lat, lng]
   child: Child;
   lastUpdate: string;
-  status: 'INSIDE' | 'OUTSIDE' | 'UNKNOWN';
+  batteryLevel?: number;
+  isWithinArea: boolean;
+}
+
+// API Error
+export interface ApiError {
+  statusCode: number;
+  message: string;
+  error: string;
+}
+
+// ==========================================
+// API RESPONSE FORMAT (Standardized)
+// ==========================================
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    pageSize?: number;
+    pages?: number;
+  };
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+  data: null;
+  code?: string;
+  details?: string[];
 }

@@ -23,7 +23,7 @@ const InvalidStateDemo = () => {
         []
     );
     const [value1, setValue1] = useState("");
-    const [value2, setValue2] = useState(null);
+    const [value2, setValue2] = useState<Demo.Country | undefined>(undefined);
     const [value3, setValue3] = useState(null);
     const [value4, setValue4] = useState<any[]>([]);
     const [value5, setValue5] = useState("");
@@ -82,7 +82,7 @@ const InvalidStateDemo = () => {
                     </div>
                     <div className="field">
                         <label htmlFor="autocomplete">AutoComplete</label>
-                        <AutoComplete
+                        <AutoComplete<Demo.Country>
                             id="autocomplete"
                             value={value2}
                             onChange={(e) => setValue2(e.value)}

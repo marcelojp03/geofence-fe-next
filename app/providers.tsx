@@ -1,14 +1,14 @@
 'use client';
 
-import { PrimeReactProvider } from 'primereact/api';
+import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 import { AuthProvider } from '../lib/auth/AuthContext';
 import { LayoutProvider } from '../layout/context/layoutcontext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
     const value = {
         ripple: true,
-        inputStyle: 'outlined',
-        appendTo: 'self'
+        inputStyle: 'outlined' as const,
+        appendTo: 'self' as const
     };
 
     return (
