@@ -12,15 +12,15 @@ const AppMenu = () => {
 
     const model: AppMenuItem[] = [
         {
-            label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+            label: 'Inicio',
+            items: [{ label: 'Panel de Control', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Geofence Management',
+            label: 'Gestión de Geofencing',
             items: [
-                { label: 'Monitoring', icon: 'pi pi-fw pi-map', to: '/monitoring' },
-                { label: 'Parents', icon: 'pi pi-fw pi-users', to: '/parents' },
-                { label: 'Children', icon: 'pi pi-fw pi-user', to: '/children' }
+                { label: 'Monitoreo', icon: 'pi pi-fw pi-map', to: '/monitoring' },
+                { label: 'Estudiantes', icon: 'pi pi-fw pi-users', to: '/children' },
+                { label: 'Padres de Familia', icon: 'pi pi-fw pi-user', to: '/parents' }
             ]
         }
     ];

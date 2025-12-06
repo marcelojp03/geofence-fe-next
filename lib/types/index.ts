@@ -200,6 +200,7 @@ export interface PositionWithChild extends Position {
     parent?: User;
     devices?: Device[];
   };
+  isInsideGeofence?: boolean;
 }
 
 // ==========================================

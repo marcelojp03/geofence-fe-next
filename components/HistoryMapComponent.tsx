@@ -120,7 +120,7 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
         return (
             <div className="flex flex-column align-items-center justify-content-center" style={{ height: '400px' }}>
                 <i className="pi pi-map-marker text-500" style={{ fontSize: '3rem' }}></i>
-                <p className="text-500 mt-3">No position data available for the selected period</p>
+                <p className="text-500 mt-3">No hay datos de posición para el período seleccionado</p>
             </div>
         );
     }
@@ -131,18 +131,18 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
             <div className="flex gap-4 mb-3 p-2 surface-100 border-round">
                 <div className="flex align-items-center gap-2">
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
-                    <span className="text-sm">Start</span>
+                    <span className="text-sm">Inicio</span>
                 </div>
                 <div className="flex align-items-center gap-2">
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ef4444' }}></div>
-                    <span className="text-sm">End (Latest)</span>
+                    <span className="text-sm">Fin (Última)</span>
                 </div>
                 <div className="flex align-items-center gap-2">
                     <div style={{ width: '24px', height: '3px', backgroundColor: '#3b82f6' }}></div>
-                    <span className="text-sm">Path</span>
+                    <span className="text-sm">Recorrido</span>
                 </div>
                 <div className="ml-auto text-500 text-sm">
-                    {validPositions.length} positions shown
+                    {validPositions.length} posiciones mostradas
                 </div>
             </div>
 
@@ -182,13 +182,13 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
                         <Popup>
                             <div style={{ minWidth: '180px' }}>
                                 <h4 style={{ margin: '0 0 8px 0', color: '#22c55e' }}>
-                                    <i className="pi pi-flag mr-2"></i>Start Point
+                                    <i className="pi pi-flag mr-2"></i>Punto de Inicio
                                 </h4>
                                 <p style={{ margin: '4px 0' }}>
-                                    <strong>Child:</strong> {childName}
+                                    <strong>Niño:</strong> {childName}
                                 </p>
                                 <p style={{ margin: '4px 0' }}>
-                                    <strong>Time:</strong> {formatDateTime(validPositions[0].createdAt)}
+                                    <strong>Hora:</strong> {formatDateTime(validPositions[0].createdAt)}
                                 </p>
                                 <p style={{ margin: '4px 0', fontSize: '0.85em', color: '#666' }}>
                                     {validPositions[0].lat.toFixed(6)}, {validPositions[0].lng.toFixed(6)}
@@ -210,17 +210,17 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
                         <Popup>
                             <div style={{ minWidth: '180px' }}>
                                 <h4 style={{ margin: '0 0 8px 0', color: '#ef4444' }}>
-                                    <i className="pi pi-map-marker mr-2"></i>Latest Position
+                                    <i className="pi pi-map-marker mr-2"></i>Última Posición
                                 </h4>
                                 <p style={{ margin: '4px 0' }}>
-                                    <strong>Child:</strong> {childName}
+                                    <strong>Niño:</strong> {childName}
                                 </p>
                                 <p style={{ margin: '4px 0' }}>
-                                    <strong>Time:</strong> {formatDateTime(validPositions[validPositions.length - 1].createdAt)}
+                                    <strong>Hora:</strong> {formatDateTime(validPositions[validPositions.length - 1].createdAt)}
                                 </p>
                                 {validPositions[validPositions.length - 1].batteryLevel !== undefined && (
                                     <p style={{ margin: '4px 0' }}>
-                                        <strong>Battery:</strong> {validPositions[validPositions.length - 1].batteryLevel}%
+                                        <strong>Batería:</strong> {validPositions[validPositions.length - 1].batteryLevel}%
                                     </p>
                                 )}
                                 <p style={{ margin: '4px 0', fontSize: '0.85em', color: '#666' }}>
@@ -241,14 +241,14 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
                         <Popup>
                             <div style={{ minWidth: '160px' }}>
                                 <h4 style={{ margin: '0 0 8px 0', color: '#3b82f6' }}>
-                                    Waypoint #{index + 2}
+                                    Punto #{index + 2}
                                 </h4>
                                 <p style={{ margin: '4px 0' }}>
-                                    <strong>Time:</strong> {formatDateTime(position.createdAt)}
+                                    <strong>Hora:</strong> {formatDateTime(position.createdAt)}
                                 </p>
                                 {position.speed !== undefined && position.speed > 0 && (
                                     <p style={{ margin: '4px 0' }}>
-                                        <strong>Speed:</strong> {(position.speed * 3.6).toFixed(1)} km/h
+                                        <strong>Velocidad:</strong> {(position.speed * 3.6).toFixed(1)} km/h
                                     </p>
                                 )}
                                 <p style={{ margin: '4px 0', fontSize: '0.85em', color: '#666' }}>
@@ -264,7 +264,7 @@ const HistoryMapComponent: React.FC<HistoryMapComponentProps> = ({
             {validPositions.length > 20 && (
                 <p className="text-500 text-sm mt-2">
                     <i className="pi pi-info-circle mr-1"></i>
-                    Showing path with start and end points only. {validPositions.length - 2} intermediate waypoints hidden for clarity.
+                    Mostrando recorrido con puntos de inicio y fin. {validPositions.length - 2} puntos intermedios ocultos para mayor claridad.
                 </p>
             )}
         </div>

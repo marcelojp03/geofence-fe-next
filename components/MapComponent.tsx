@@ -163,7 +163,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                                         }}
                                     >
                                         <i className="pi pi-history" style={{ fontSize: '0.9em' }}></i>
-                                        View History
+                                        Ver Historial
                                     </Link>
                                 </div>
                             )}

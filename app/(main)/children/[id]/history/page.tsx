@@ -64,7 +64,7 @@ export default function ChildHistoryPage() {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Could not load child information',
+                detail: 'No se pudo cargar la información del niño',
                 life: 3000,
             });
         } finally {
@@ -91,7 +91,7 @@ export default function ChildHistoryPage() {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.message || 'Error loading position history',
+                detail: error.message || 'Error al cargar el historial de posiciones',
                 life: 3000,
             });
         } finally {
@@ -186,8 +186,8 @@ export default function ChildHistoryPage() {
                                     onClick={() => router.back()}
                                 />
                                 <div>
-                                    <h4 className="m-0">{child?.fullName || 'Child'}</h4>
-                                    <p className="text-500 m-0">Position History</p>
+                                    <h4 className="m-0">{child?.fullName || 'Niño'}</h4>
+                                    <p className="text-500 m-0">Historial de Posiciones</p>
                                 </div>
                             </div>
                             <div className="flex align-items-center gap-2">
@@ -195,7 +195,7 @@ export default function ChildHistoryPage() {
                                     <Tag value={child.grade} severity="info" />
                                 )}
                                 <Tag
-                                    value={child?.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                                    value={child?.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                                     severity={child?.status === 'ACTIVE' ? 'success' : 'danger'}
                                 />
                             </div>
@@ -218,7 +218,7 @@ export default function ChildHistoryPage() {
                                 <i className="pi pi-map-marker text-blue-500 text-xl"></i>
                             </div>
                         </div>
-                        <span className="text-500">Records in selected period</span>
+                        <span className="text-500">Registros en el período seleccionado</span>
                     </div>
                 </div>
 
@@ -226,7 +226,7 @@ export default function ChildHistoryPage() {
                     <div className="card mb-0">
                         <div className="flex justify-content-between mb-3">
                             <div>
-                                <span className="block text-500 font-medium mb-3">Parent</span>
+                                <span className="block text-500 font-medium mb-3">Padre/Madre</span>
                                 <div className="text-900 font-medium text-xl">
                                     {child?.parent?.fullName || 'N/A'}
                                 </div>
@@ -238,7 +238,7 @@ export default function ChildHistoryPage() {
                                 <i className="pi pi-user text-orange-500 text-xl"></i>
                             </div>
                         </div>
-                        <span className="text-500">{child?.parent?.phone || 'No phone'}</span>
+                        <span className="text-500">{child?.parent?.phone || 'Sin teléfono'}</span>
                     </div>
                 </div>
 
@@ -246,7 +246,7 @@ export default function ChildHistoryPage() {
                     <div className="card mb-0">
                         <div className="flex justify-content-between mb-3">
                             <div>
-                                <span className="block text-500 font-medium mb-3">Last Update</span>
+                                <span className="block text-500 font-medium mb-3">Última Actualización</span>
                                 <div className="text-900 font-medium text-xl">
                                     {positions.length > 0 ? formatTime(positions[0].createdAt) : 'N/A'}
                                 </div>
@@ -259,7 +259,7 @@ export default function ChildHistoryPage() {
                             </div>
                         </div>
                         <span className="text-500">
-                            {positions.length > 0 ? formatDate(positions[0].createdAt) : 'No data'}
+                            {positions.length > 0 ? formatDate(positions[0].createdAt) : 'Sin datos'}
                         </span>
                     </div>
                 </div>
@@ -267,10 +267,10 @@ export default function ChildHistoryPage() {
                 {/* Filters */}
                 <div className="col-12">
                     <div className="card">
-                        <h5>Filters</h5>
+                        <h5>Filtros</h5>
                         <div className="grid">
                             <div className="col-12 md:col-6">
-                                <label className="block text-900 font-medium mb-2">Date Range</label>
+                                <label className="block text-900 font-medium mb-2">Rango de Fechas</label>
                                 <Calendar
                                     value={dateRange}
                                     onChange={handleDateChange}
@@ -279,25 +279,25 @@ export default function ChildHistoryPage() {
                                     showIcon
                                     showButtonBar
                                     className="w-full"
-                                    placeholder="Select date range"
+                                    placeholder="Seleccionar rango de fechas"
                                     maxDate={new Date()}
                                 />
                             </div>
                             <div className="col-12 md:col-6 flex align-items-end gap-2">
                                 <Button
-                                    label="Apply Filter"
+                                    label="Aplicar Filtro"
                                     icon="pi pi-filter"
                                     onClick={handleFilter}
                                     loading={loading}
                                 />
                                 <Button
-                                    label="Clear"
+                                    label="Limpiar"
                                     icon="pi pi-times"
                                     severity="secondary"
                                     onClick={handleClearFilter}
                                 />
                                 <Button
-                                    label="Refresh"
+                                    label="Actualizar"
                                     icon="pi pi-refresh"
                                     severity="info"
                                     onClick={loadHistory}
@@ -312,32 +312,32 @@ export default function ChildHistoryPage() {
                 <div className="col-12">
                     <div className="card">
                         <TabView>
-                            <TabPanel header="Map View" leftIcon="pi pi-map mr-2">
+                            <TabPanel header="Vista Mapa" leftIcon="pi pi-map mr-2">
                                 <HistoryMapComponent
                                     positions={positions}
-                                    childName={child?.fullName || 'Child'}
+                                    childName={child?.fullName || 'Niño'}
                                 />
                             </TabPanel>
-                            <TabPanel header="Table View" leftIcon="pi pi-table mr-2">
+                            <TabPanel header="Vista Tabla" leftIcon="pi pi-table mr-2">
                                 <DataTable
                                     value={positions}
                                     loading={loading}
                                     paginator
                                     rows={10}
                                     rowsPerPageOptions={[5, 10, 25, 50]}
-                                    emptyMessage="No position history found"
+                                    emptyMessage="No se encontró historial de posiciones"
                                     sortField="createdAt"
                                     sortOrder={-1}
                                     className="datatable-responsive"
                                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} positions"
+                                    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} posiciones"
                                 >
-                                    <Column field="createdAt" header="Date" body={dateTemplate} sortable style={{ minWidth: '8rem' }} />
-                                    <Column field="createdAt" header="Time" body={timeTemplate} sortable style={{ minWidth: '8rem' }} />
-                                    <Column header="Coordinates" body={coordinatesTemplate} style={{ minWidth: '12rem' }} />
-                                    <Column header="Accuracy" body={accuracyTemplate} style={{ minWidth: '6rem' }} />
-                                    <Column header="Speed" body={speedTemplate} style={{ minWidth: '6rem' }} />
-                                    <Column header="Battery" body={batteryTemplate} style={{ minWidth: '6rem' }} />
+                                    <Column field="createdAt" header="Fecha" body={dateTemplate} sortable style={{ minWidth: '8rem' }} />
+                                    <Column field="createdAt" header="Hora" body={timeTemplate} sortable style={{ minWidth: '8rem' }} />
+                                    <Column header="Coordenadas" body={coordinatesTemplate} style={{ minWidth: '12rem' }} />
+                                    <Column header="Precisión" body={accuracyTemplate} style={{ minWidth: '6rem' }} />
+                                    <Column header="Velocidad" body={speedTemplate} style={{ minWidth: '6rem' }} />
+                                    <Column header="Batería" body={batteryTemplate} style={{ minWidth: '6rem' }} />
                                 </DataTable>
                             </TabPanel>
                         </TabView>
