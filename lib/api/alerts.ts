@@ -1,5 +1,5 @@
 import { http } from "./http";
-import { Alert } from "../types";
+import { Alert, AlertSummaryResponse } from "../types";
 
 /**
  * Alerts API Service
@@ -41,4 +41,24 @@ export const markAlertAsRead = async (id: number): Promise<Alert> => {
 // Mark all alerts as read
 export const markAllAlertsAsRead = async (): Promise<void> => {
   await http.patch("/alerts/mark-all-read");
+};
+
+// ==========================================
+// NEW ENDPOINT
+// ==========================================
+
+// Get alert summary for a child
+export interface AlertSummaryParams {
+  from?: string;      // ISO 8601
+  to?: string;        // ISO 8601
+}
+
+export const getChildAlertSummary = async (
+  childId: number,
+  params?: AlertSummaryParams
+): Promise<AlertSummaryResponse> => {
+  const response = await http.get<AlertSummaryResponse>(`/alerts/child/${childId}/summary`, {
+    params,
+  });
+  return response.data;
 };

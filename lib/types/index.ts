@@ -41,13 +41,26 @@ export interface RegisterResponse {
 // SCHOOL TYPES
 // ==========================================
 
+export interface GeoJSONPolygon {
+  type: 'Polygon';
+  coordinates: number[][][];
+}
+
 export interface School {
   id: number;
   name: string;
   address?: string;
   phone?: string;
   status: 'ACTIVE' | 'INACTIVE';
+  geofence?: GeoJSONPolygon;
   createdAt: string;
+}
+
+export interface SchoolGeofence {
+  id: number;
+  name: string;
+  geofence: GeoJSONPolygon | null;
+  hasGeofence: boolean;
 }
 
 export interface CreateSchoolRequest {
@@ -200,7 +213,10 @@ export interface PositionWithChild extends Position {
     parent?: User;
     devices?: Device[];
   };
-  isInsideGeofence?: boolean;
+  isInsideGeofence?: boolean | null;
+  hasSignal?: boolean;
+  status?: 'inside' | 'outside' | 'no_signal';
+  minutesSinceUpdate?: number | null;
 }
 
 // ==========================================
@@ -247,6 +263,126 @@ export interface TrackingHistoryParams {
   limit?: number;
   from?: string;
   to?: string;
+}
+
+// ==========================================
+// ROUTE & STATS TYPES (New Endpoints)
+// ==========================================
+
+export interface RoutePoint {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  speed?: number;
+  heading?: number;
+  altitude?: number;
+  batteryLevel?: number;
+  time: string;
+}
+
+export interface RouteStats {
+  totalPoints: number;
+  totalDistanceKm: number;
+  avgSpeedMs: number;
+  maxSpeedMs: number;
+  timeInAreaMinutes: number;
+  timeOutAreaMinutes: number;
+  firstPosition: string | null;
+  lastPosition: string | null;
+  entryTime: string | null;
+  exitTime: string | null;
+}
+
+export interface RouteEvent {
+  id: number;
+  type: 'ENTER_AREA' | 'EXIT_AREA';
+  message: string;
+  time: string;
+}
+
+export interface ChildRouteResponse {
+  child: {
+    id: number;
+    fullName: string;
+    grade?: string;
+    school?: {
+      id: number;
+      name: string;
+    };
+  };
+  dateRange: {
+    from: string;
+    to: string;
+  };
+  route: RoutePoint[];
+  stats: RouteStats;
+  events: RouteEvent[];
+}
+
+export interface ChildStatsResponse {
+  child: {
+    id: number;
+    fullName: string;
+    grade?: string;
+  };
+  period: {
+    type: 'day' | 'week' | 'month';
+    from: string;
+    to: string;
+  };
+  stats: {
+    totalPositions: number;
+    exitAlerts: number;
+    entryAlerts: number;
+  };
+  lastKnown: {
+    lat: number;
+    lng: number;
+    batteryLevel?: number;
+    time: string;
+  } | null;
+  device: {
+    id: number;
+    name: string;
+    model?: string;
+    lastBatteryLevel?: number;
+    lastSeen: string;
+    status: 'ACTIVE' | 'INACTIVE';
+  } | null;
+}
+
+export interface AlertSummaryResponse {
+  child: {
+    id: number;
+    fullName: string;
+    grade?: string;
+  };
+  period: {
+    from: string;
+    to: string;
+  };
+  summary: {
+    total: number;
+    exitAlerts: number;
+    entryAlerts: number;
+    unread: number;
+  };
+  byDay: Array<{
+    date: string;
+    exit: number;
+    entry: number;
+  }>;
+  alerts: Array<{
+    id: number;
+    type: 'ENTER_AREA' | 'EXIT_AREA';
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+    position?: {
+      lat: number;
+      lng: number;
+    };
+  }>;
 }
 
 // Map Types

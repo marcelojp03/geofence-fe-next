@@ -4,7 +4,6 @@ import 'primereact/resources/primereact.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import '../styles/layout/layout.scss';
-import '../styles/demo/Demos.scss';
 
 interface RootLayoutProps {
     children: React.ReactNode;
@@ -17,10 +16,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'Geofence Admin',
-    description: 'Geofence Management System',
+    title: 'Geofence - Sistema de Monitoreo Escolar',
+    description: 'Sistema de geofence para monitoreo de estudiantes',
     icons: {
-        icon: '/favicon.ico'
+        icon: '/icons/geofencing_logo.png'
     }
 };
 

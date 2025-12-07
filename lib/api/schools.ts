@@ -1,6 +1,7 @@
 import { http } from "./http";
 import {
   School,
+  SchoolGeofence,
   CreateSchoolRequest,
   UpdateSchoolRequest,
 } from "../types";
@@ -18,6 +19,18 @@ export const getSchools = async (): Promise<School[]> => {
 // Get single school by ID
 export const getSchool = async (id: number): Promise<School> => {
   const response = await http.get<School>(`/schools/${id}`);
+  return response.data;
+};
+
+// Get school geofence
+export const getSchoolGeofence = async (id: number): Promise<SchoolGeofence> => {
+  const response = await http.get<SchoolGeofence>(`/schools/${id}/geofence`);
+  return response.data;
+};
+
+// Get all schools with geofences
+export const getSchoolsWithGeofences = async (): Promise<SchoolGeofence[]> => {
+  const response = await http.get<SchoolGeofence[]>("/schools/with-geofences");
   return response.data;
 };
 

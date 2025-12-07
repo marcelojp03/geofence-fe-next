@@ -2,7 +2,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useState, useEffect } from 'react';
-import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
@@ -14,7 +13,6 @@ import { Toast } from 'primereact/toast';
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [checked, setChecked] = useState(false);
     const [loading, setLoading] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const { user, login } = useAuth();
@@ -32,8 +30,8 @@ const LoginPage = () => {
         if (!email || !password) {
             toast.current?.show({
                 severity: 'warn',
-                summary: 'Warning',
-                detail: 'Please enter email and password',
+                summary: 'Advertencia',
+                detail: 'Ingrese correo y contraseña',
                 life: 3000
             });
             return;
@@ -45,19 +43,19 @@ const LoginPage = () => {
             await login({ email, password });
             toast.current?.show({
                 severity: 'success',
-                summary: 'Success',
-                detail: 'Login successful! Redirecting...',
+                summary: 'Éxito',
+                detail: 'Sesión iniciada correctamente',
                 life: 2000
             });
             setTimeout(() => {
                 router.push('/monitoring');
-            }, 1000);
+            }, 500);
         } catch (err: any) {
             console.error('Login error:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password';
+            const errorMessage = err.response?.data?.message || err.message || 'Correo o contraseña incorrectos';
             toast.current?.show({
                 severity: 'error',
-                summary: 'Login Failed',
+                summary: 'Error',
                 detail: errorMessage,
                 life: 5000
             });
@@ -72,7 +70,7 @@ const LoginPage = () => {
         <div className={containerClassName}>
             <Toast ref={toast} position="top-right" style={{ zIndex: 9999 }} />
             <div className="flex flex-column align-items-center justify-content-center">
-                <img src={`/layout/images/logo-${layoutConfig.colorScheme === 'light' ? 'dark' : 'white'}.svg`} alt="Sakai logo" className="mb-5 w-6rem flex-shrink-0" />
+                <img src="/icons/geofencing_banner.png" alt="Geofence logo" className="mb-5" style={{ height: '160px' }} />
                 <div
                     style={{
                         borderRadius: '56px',
@@ -82,19 +80,18 @@ const LoginPage = () => {
                 >
                     <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
                         <div className="text-center mb-5">
-                            <img src="/demo/images/login/avatar.png" alt="Image" height="50" className="mb-3" />
-                            <div className="text-900 text-3xl font-medium mb-3">Geofence Admin</div>
-                            <span className="text-600 font-medium">Sign in to continue</span>
+                            <div className="text-900 text-3xl font-medium mb-3">Bienvenido</div>
+                            <span className="text-600 font-medium">Inicia sesión para continuar</span>
                         </div>
 
                         <div>
                             <label htmlFor="email1" className="block text-900 text-xl font-medium mb-2">
-                                Email
+                                Correo Electrónico
                             </label>
                             <InputText 
                                 id="email1" 
                                 type="email" 
-                                placeholder="Email address" 
+                                placeholder="correo@ejemplo.com" 
                                 className="w-full md:w-30rem mb-5" 
                                 style={{ padding: '1rem' }}
                                 value={email}
@@ -104,13 +101,13 @@ const LoginPage = () => {
                             />
 
                             <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
-                                Password
+                                Contraseña
                             </label>
                             <Password 
                                 inputId="password1" 
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
-                                placeholder="Password" 
+                                placeholder="Contraseña" 
                                 toggleMask 
                                 className="w-full mb-5" 
                                 inputClassName="w-full p-3 md:w-30rem"
@@ -119,17 +116,8 @@ const LoginPage = () => {
                                 required
                             />
 
-                            <div className="flex align-items-center justify-content-between mb-5 gap-5">
-                                <div className="flex align-items-center">
-                                    <Checkbox inputId="rememberme1" checked={checked} onChange={(e) => setChecked(e.checked ?? false)} className="mr-2"></Checkbox>
-                                    <label htmlFor="rememberme1">Remember me</label>
-                                </div>
-                                <a className="font-medium no-underline ml-2 text-right cursor-pointer" style={{ color: 'var(--primary-color)' }}>
-                                    Forgot password?
-                                </a>
-                            </div>
                             <Button 
-                                label={loading ? 'Signing In...' : 'Sign In'} 
+                                label={loading ? 'Iniciando sesión...' : 'Iniciar Sesión'} 
                                 className="w-full p-3 text-xl" 
                                 onClick={handleSubmit}
                                 disabled={loading}

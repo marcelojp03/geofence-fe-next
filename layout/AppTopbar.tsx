@@ -24,14 +24,14 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
 
     const handleLogout = () => {
         logout();
-        router.push('/login');
+        router.push('/auth/login');
     };
 
     return (
         <div className="layout-topbar">
             <Link href="/" className="layout-topbar-logo">
-                <img src={`/layout/images/logo-${layoutConfig.colorScheme !== 'light' ? 'white' : 'dark'}.svg`} width="47.22px" height={'35px'} alt="logo" />
-                <span>Geofence Admin</span>
+                <img src="/icons/geofencing_logo.png" width="40px" height="40px" alt="logo" />
+                <span>Geofence</span>
             </Link>
 
             <button ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>

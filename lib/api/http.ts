@@ -43,7 +43,7 @@ http.interceptors.response.use(
     if (typeof window !== "undefined" && error.response?.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     }
 
     // Handle 403 Forbidden

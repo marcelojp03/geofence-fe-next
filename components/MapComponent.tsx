@@ -1,9 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, WMSTileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, WMSTileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { PositionWithChild } from '@/lib/types';
+import { PositionWithChild, SchoolGeofence } from '@/lib/types';
 import Link from 'next/link';
 
 // Fix Leaflet default marker icons in Next.js
@@ -32,6 +32,7 @@ const greyIcon = createMarkerIcon('grey');
 
 interface MapComponentProps {
     positions: PositionWithChild[];
+    geofences?: SchoolGeofence[];
     center?: [number, number];
     zoom?: number;
     showGeoServer?: boolean;
@@ -48,6 +49,7 @@ function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }
 
 const MapComponent: React.FC<MapComponentProps> = ({
     positions,
+    geofences = [],
     center = [-17.783, -63.182], // Santa Cruz, Bolivia default
     zoom = 13,
     showGeoServer = false,
@@ -101,12 +103,43 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 />
             )}
 
+            {/* Geofence polygons */}
+            {geofences
+                .filter((g) => g.hasGeofence && g.geofence)
+                .map((geofence) => {
+                    // Convert GeoJSON coordinates [lng, lat] to Leaflet [lat, lng]
+                    const positions = geofence.geofence!.coordinates[0].map(
+                        (coord) => [coord[1], coord[0]] as [number, number]
+                    );
+                    return (
+                        <Polygon
+                            key={`geofence-${geofence.id}`}
+                            positions={positions}
+                            pathOptions={{
+                                color: '#3b82f6',
+                                fillColor: '#3b82f6',
+                                fillOpacity: 0.2,
+                                weight: 2,
+                            }}
+                        >
+                            <Popup>
+                                <div>
+                                    <strong>{geofence.name}</strong>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.9em', color: '#666' }}>
+                                        Área de geofence
+                                    </p>
+                                </div>
+                            </Popup>
+                        </Polygon>
+                    );
+                })}
+
             {/* Position markers - filter out invalid positions */}
             {positions
                 .filter((position) => position.lat != null && position.lng != null)
-                .map((position) => (
+                .map((position, index) => (
                 <Marker
-                    key={position.id}
+                    key={`marker-${position.id ?? index}-${position.childId ?? 'unknown'}`}
                     position={[position.lat, position.lng]}
                     icon={getMarkerIcon()}
                 >

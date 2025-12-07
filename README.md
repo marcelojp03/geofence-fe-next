@@ -6,6 +6,8 @@
 [![PrimeReact](https://img.shields.io/badge/PrimeReact-10.9-orange)](https://primereact.org/)
 [![AWS Amplify](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)](https://aws.amazon.com/amplify/)
 
+**URL:** [https://dev.d27fvts9swigld.amplifyapp.com](https://dev.d27fvts9swigld.amplifyapp.com)
+
 Web application for real-time geofence monitoring and location tracking management.
 
 ## Prerequisites
