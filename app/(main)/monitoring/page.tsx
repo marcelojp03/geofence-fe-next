@@ -60,11 +60,11 @@ export default function MonitoringPage() {
         { label: 'Fuera', value: 'outside' },
     ];
 
-    // Stats - usando los campos del backend
+    // Stats - usando los nuevos campos del backend
     const totalChildren = children.length;
-    const insideCount = positions.filter(p => p.status === 'inside').length;
-    const outsideCount = positions.filter(p => p.status === 'outside').length;
-    const noSignalCount = positions.filter(p => p.status === 'no_signal').length;
+    const insideCount = positions.filter(p => p.locationStatus === 'inside').length;
+    const outsideCount = positions.filter(p => p.locationStatus === 'outside').length;
+    const noSignalCount = positions.filter(p => p.deviceStatus === 'no_signal' || p.deviceStatus === 'no_device').length;
 
     useEffect(() => {
         loadData();
@@ -126,8 +126,8 @@ export default function MonitoringPage() {
     const applyFilters = () => {
         let filtered = [...positions];
         if (selectedChild) filtered = filtered.filter(p => p.childId === selectedChild.id);
-        if (statusFilter === 'inside') filtered = filtered.filter(p => p.isInsideGeofence === true);
-        else if (statusFilter === 'outside') filtered = filtered.filter(p => p.isInsideGeofence === false);
+        if (statusFilter === 'inside') filtered = filtered.filter(p => p.locationStatus === 'inside');
+        else if (statusFilter === 'outside') filtered = filtered.filter(p => p.locationStatus === 'outside');
         setFilteredPositions(filtered);
     };
 
@@ -179,10 +179,11 @@ export default function MonitoringPage() {
         else await handleChildSelect(child);
     };
 
-    const getChildStatus = (childId: number): 'inside' | 'outside' | 'no_signal' => {
+    const getChildStatus = (childId: number): 'inside' | 'outside' | 'no_signal' | 'no_device' => {
         const pos = positions.find(p => p.childId === childId);
-        if (!pos) return 'no_signal';
-        return pos.status || 'no_signal';
+        if (!pos) return 'no_device';
+        if (pos.deviceStatus === 'no_device' || pos.deviceStatus === 'no_signal') return pos.deviceStatus;
+        return pos.locationStatus === 'inside' ? 'inside' : pos.locationStatus === 'outside' ? 'outside' : 'no_signal';
     };
 
     const formatTime = (timestamp: string) => {
@@ -190,18 +191,24 @@ export default function MonitoringPage() {
     };
 
     const statusBodyTemplate = (rowData: PositionWithChild) => {
-        if (rowData.status === 'inside') return <Tag severity="success" icon="pi pi-check">Dentro</Tag>;
-        if (rowData.status === 'outside') return <Tag severity="danger" icon="pi pi-exclamation-triangle">Fuera</Tag>;
-        if (rowData.status === 'no_signal') return <Tag severity="warning" icon="pi pi-wifi">Sin señal</Tag>;
+        // Primero verificar estado del dispositivo
+        if (rowData.deviceStatus === 'no_device') return <Tag severity="secondary" icon="pi pi-mobile">Sin dispositivo</Tag>;
+        if (rowData.deviceStatus === 'no_signal') return <Tag severity="warning" icon="pi pi-wifi">Sin señal</Tag>;
+        
+        // Luego verificar ubicación
+        if (rowData.locationStatus === 'inside') return <Tag severity="success" icon="pi pi-check">Dentro</Tag>;
+        if (rowData.locationStatus === 'outside') return <Tag severity="danger" icon="pi pi-exclamation-triangle">Fuera</Tag>;
+        
         return <Tag severity="secondary">Desconocido</Tag>;
     };
 
-    const formatMinutes = (minutes: number | null | undefined) => {
+    const formatMinutes = (minutes: number | null | undefined): string => {
         if (minutes === null || minutes === undefined) return 'Sin datos';
         if (minutes < 1) return 'Ahora';
         if (minutes < 60) return `Hace ${minutes} min`;
         const hours = Math.floor(minutes / 60);
-        return `Hace ${hours}h ${minutes % 60}m`;
+        const mins = minutes % 60;
+        return mins > 0 ? `Hace ${hours}h ${mins}m` : `Hace ${hours}h`;
     };
 
     return (
@@ -349,6 +356,7 @@ export default function MonitoringPage() {
                                                 const status = getChildStatus(child.id);
                                                 const isSelected = selectedChild?.id === child.id;
                                                 const position = positions.find(p => p.childId === child.id);
+                                                const statusColor = status === 'inside' ? 'text-green-500' : status === 'outside' ? 'text-red-500' : status === 'no_device' ? 'text-bluegray-400' : 'text-orange-500';
                                                 return (
                                                     <div
                                                         key={child.id}
@@ -356,14 +364,16 @@ export default function MonitoringPage() {
                                                         style={isSelected ? { border: '1px solid var(--primary-color)' } : {}}
                                                         onClick={() => handleChildClick(child)}
                                                     >
-                                                        <i className={`pi pi-circle-fill mr-2 ${status === 'inside' ? 'text-green-500' : status === 'outside' ? 'text-red-500' : 'text-orange-500'}`} style={{ fontSize: '0.7rem' }}></i>
+                                                        <i className={`pi pi-circle-fill mr-2 ${statusColor}`} style={{ fontSize: '0.7rem' }}></i>
                                                         <div className="flex-1">
                                                             <div className="text-900 text-sm font-medium">{child.fullName}</div>
                                                             <div className="text-500 text-xs">
                                                                 {position 
                                                                     ? (position.minutesSinceUpdate != null 
-                                                                        ? `Hace ${formatMinutes(position.minutesSinceUpdate)}` 
-                                                                        : formatTime(position.createdAt))
+                                                                        ? formatMinutes(position.minutesSinceUpdate)
+                                                                        : position.lastPositionAt 
+                                                                            ? formatTime(position.lastPositionAt)
+                                                                            : 'Sin ubicación')
                                                                     : 'Sin datos'}
                                                             </div>
                                                         </div>
@@ -401,10 +411,10 @@ export default function MonitoringPage() {
                                 <i className="pi pi-exclamation-triangle text-red-500 mr-2"></i>
                                 Estudiantes Fuera del Área ({outsideCount})
                             </h5>
-                            <DataTable value={positions.filter(p => p.isInsideGeofence === false)} size="small" stripedRows>
-                                <Column field="child.fullName" header="Estudiante" body={(row) => row.child?.fullName || `Niño ${row.childId}`} />
+                            <DataTable value={positions.filter(p => p.locationStatus === 'outside')} size="small" stripedRows>
+                                <Column field="fullName" header="Estudiante" body={(row) => row.fullName || `Niño ${row.childId}`} />
                                 <Column header="Estado" body={statusBodyTemplate} style={{ width: '100px' }} />
-                                <Column header="Hora" body={(row) => formatTime(row.createdAt)} style={{ width: '80px' }} />
+                                <Column header="Hora" body={(row) => row.lastPositionAt ? formatTime(row.lastPositionAt) : 'Sin datos'} style={{ width: '80px' }} />
                                 <Column header="" body={(row) => <Button icon="pi pi-history" rounded text severity="info" onClick={() => router.push(`/children/${row.childId}/history`)} />} style={{ width: '50px' }} />
                             </DataTable>
                         </div>

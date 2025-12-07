@@ -99,6 +99,9 @@ export interface UpdateUserRequest {
 // CHILDREN TYPES
 // ==========================================
 
+export type DeviceStatus = 'no_device' | 'online' | 'recent' | 'no_signal';
+export type LocationStatus = 'inside' | 'outside' | 'unknown';
+
 export interface Child {
   id: number;
   schoolId: number;
@@ -108,7 +111,9 @@ export interface Child {
   grade?: string;
   status: 'ACTIVE' | 'INACTIVE';
   parent?: User;
-  devices?: Device[];
+  device?: Device | null;           // Cambiado de devices[] a device singular
+  deviceStatus?: DeviceStatus;       // NUEVO
+  minutesSinceLastSeen?: number | null; // NUEVO
   createdAt: string;
   updatedAt: string;
 }
@@ -208,15 +213,21 @@ export interface CreatePositionResponse {
   alertCreated: boolean;
 }
 
-export interface PositionWithChild extends Position {
-  child: Child & { 
-    parent?: User;
-    devices?: Device[];
-  };
+export interface PositionWithChild {
+  childId: number;
+  fullName: string;
+  grade?: string;
+  parentName?: string;               // NUEVO (solo para admin en /current)
+  lat: number | null;
+  lng: number | null;
+  batteryLevel?: number | null;
+  lastPositionAt: string | null;     // Renombrado de createdAt
   isInsideGeofence?: boolean | null;
-  hasSignal?: boolean;
-  status?: 'inside' | 'outside' | 'no_signal';
-  minutesSinceUpdate?: number | null;
+  deviceStatus: DeviceStatus;        // NUEVO: estado del dispositivo
+  locationStatus: LocationStatus;    // NUEVO: ubicación respecto al geofence
+  minutesSinceUpdate?: number | null;       // minutos desde última posición GPS
+  minutesSinceDeviceSeen?: number | null;   // NUEVO: minutos desde última conexión
+  child?: Child & { parent?: User };
 }
 
 // ==========================================

@@ -139,45 +139,35 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 .filter((position) => position.lat != null && position.lng != null)
                 .map((position, index) => (
                 <Marker
-                    key={`marker-${position.id ?? index}-${position.childId ?? 'unknown'}`}
-                    position={[position.lat, position.lng]}
+                    key={`marker-${index}-${position.childId ?? 'unknown'}`}
+                    position={[position.lat!, position.lng!]}
                     icon={getMarkerIcon()}
                 >
                     <Popup>
                         <div style={{ minWidth: '200px' }}>
-                            <h4 style={{ margin: '0 0 10px 0' }}>{position.child?.fullName || 'Unknown'}</h4>
+                            <h4 style={{ margin: '0 0 10px 0' }}>{position.fullName || 'Unknown'}</h4>
                             <p style={{ margin: '5px 0' }}>
-                                <strong>Parent:</strong> {position.child?.parent?.fullName || 'N/A'}
+                                <strong>Parent:</strong> {position.parentName || position.child?.parent?.fullName || 'N/A'}
                             </p>
                             <p style={{ margin: '5px 0' }}>
-                                <strong>Grade:</strong> {position.child?.grade || 'N/A'}
+                                <strong>Grade:</strong> {position.grade || 'N/A'}
                             </p>
-                            {position.batteryLevel !== undefined && (
+                            {position.batteryLevel != null && (
                                 <p style={{ margin: '5px 0' }}>
                                     <strong>Battery:</strong>{' '}
                                     <span style={{ 
-                                        color: position.batteryLevel < 20 ? 'red' : position.batteryLevel < 50 ? 'orange' : 'green' 
+                                        color: position.batteryLevel! < 20 ? 'red' : position.batteryLevel! < 50 ? 'orange' : 'green' 
                                     }}>
                                         {position.batteryLevel}%
                                     </span>
                                 </p>
                             )}
                             <p style={{ margin: '5px 0' }}>
-                                <strong>Last Update:</strong> {formatTimestamp(position.createdAt)}
+                                <strong>Last Update:</strong> {position.lastPositionAt ? formatTimestamp(position.lastPositionAt) : 'Sin datos'}
                             </p>
                             <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
                                 Lat: {position.lat?.toFixed(6) ?? 'N/A'}, Lng: {position.lng?.toFixed(6) ?? 'N/A'}
                             </p>
-                            {position.accuracy && (
-                                <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
-                                    Accuracy: ±{position.accuracy}m
-                                </p>
-                            )}
-                            {position.speed !== undefined && position.speed > 0 && (
-                                <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
-                                    Speed: {(position.speed * 3.6).toFixed(1)} km/h
-                                </p>
-                            )}
                             {position.childId && (
                                 <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #eee' }}>
                                     <Link
