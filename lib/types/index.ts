@@ -111,9 +111,8 @@ export interface Child {
   grade?: string;
   status: 'ACTIVE' | 'INACTIVE';
   parent?: User;
-  device?: Device | null;           // Cambiado de devices[] a device singular
-  deviceStatus?: DeviceStatus;       // NUEVO
-  minutesSinceLastSeen?: number | null; // NUEVO
+  devices?: Device[];                // Para /children (admin)
+  _count?: { positions?: number; alerts?: number };
   createdAt: string;
   updatedAt: string;
 }

@@ -30,7 +30,9 @@ export const getChildPositionHistory = async (
 
 // Get all current positions for school (admin dashboard)
 export const getAllCurrentPositions = async (): Promise<PositionWithChild[]> => {
+  console.log('[API] GET /tracking/current');
   const response = await http.get<PositionWithChild[]>("/tracking/current");
+  console.log('[API] GET /tracking/current response:', response.data);
   return response.data;
 };
 

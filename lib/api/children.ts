@@ -12,19 +12,25 @@ import {
 // Get all children (schoolId is extracted from JWT token in backend)
 export const getChildren = async (parentId?: number): Promise<Child[]> => {
   const params = parentId ? { parentId } : {};
+  console.log('[API] GET /children', { params });
   const response = await http.get<Child[]>("/children", { params });
+  console.log('[API] GET /children response:', response.data);
   return response.data;
 };
 
 // Get my children (for parent users - mobile app)
 export const getMyChildren = async (): Promise<Child[]> => {
+  console.log('[API] GET /children/my-children');
   const response = await http.get<Child[]>("/children/my-children");
+  console.log('[API] GET /children/my-children response:', response.data);
   return response.data;
 };
 
 // Get single child by ID
 export const getChild = async (id: number): Promise<Child> => {
+  console.log('[API] GET /children/' + id);
   const response = await http.get<Child>(`/children/${id}`);
+  console.log('[API] GET /children/' + id + ' response:', response.data);
   return response.data;
 };
 

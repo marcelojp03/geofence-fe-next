@@ -211,7 +211,9 @@ export default function ChildrenPage() {
     };
 
     const dateBodyTemplate = (rowData: Child) => {
-        return new Date(rowData.createdAt).toLocaleDateString();
+        if (!rowData.createdAt) return 'N/A';
+        const date = new Date(rowData.createdAt);
+        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString();
     };
 
     const dialogFooter = (
